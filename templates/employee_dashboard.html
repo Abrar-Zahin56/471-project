@@ -1,0 +1,12 @@
+
+{% extends "base.html" %}
+{% block content %}
+<h2>Employee Dashboard</h2>
+<div class="card p-3">
+    <p><strong>Name:</strong> {{ profile.name }}</p>
+    <p><strong>Phone:</strong> {{ profile.phone }}</p>
+    <p><strong>Role:</strong> {{ profile.role }}</p>
+    <p><strong>Address:</strong> {{ profile.address }}</p>
+    <a href="/update-profile" class="btn btn-primary">Update Info</a>
+</div>
+{% endblock %}

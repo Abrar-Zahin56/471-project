@@ -1,0 +1,14 @@
+
+{% extends "base.html" %}
+{% block content %}
+<h2>Admin Dashboard</h2>
+<a class="btn btn-primary mb-3" href="/create-profile">Create Employee Profile</a>
+<div class="list-group">
+    {% for emp in employees %}
+        <div class="list-group-item d-flex justify-content-between">
+            <div>{{ emp.name }} ({{ emp.role }})</div>
+            <a href="/edit-role/{{ emp.user_id }}" class="btn btn-sm btn-outline-primary">Edit Role</a>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
