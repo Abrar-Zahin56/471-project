@@ -1,0 +1,55 @@
+////app.py
+
+class Alarm(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    status = db.Column(db.String(20), default='inactive')  # Fixed missing parenthesis
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    activated_by = db.Column(db.Integer, db.ForeignKey('user.id'))
+    message = db.Column(db.String(200), default='Return to station immediately!')
+
+
+@app.route('/trigger_alarm', methods=['POST'])
+def trigger_alarm():
+    if 'user_id' not in session or session['role'] != 'admin':
+        return redirect(url_for('login'))
+    
+    try:
+        new_alarm = Alarm(
+            status='active',
+            activated_by=session['user_id'],
+            message='Return to station immediately!'
+        )
+        db.session.add(new_alarm)
+        db.session.commit()
+        flash('General alarm activated!', 'danger')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error activating alarm: {str(e)}', 'danger')
+        app.logger.error(f'Alarm activation failed: {str(e)}')  # Log the error
+    
+    return redirect(url_for('dashboard'))
+
+@app.route('/deactivate_alarm', methods=['POST'])
+def deactivate_alarm():
+    if 'user_id' not in session or session['role'] != 'admin':
+        return redirect(url_for('login'))
+    
+    try:
+        # Find the most recent active alarm
+        active_alarm = Alarm.query.filter_by(status='active').order_by(Alarm.timestamp.desc()).first()
+        
+        if active_alarm:
+            # Update the existing alarm instead of creating new one
+            active_alarm.status = 'inactive'
+            active_alarm.timestamp = datetime.utcnow()
+            db.session.commit()
+            flash('Alarm deactivated', 'success')
+        else:
+            flash('No active alarm found', 'warning')
+            
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error deactivating alarm: {str(e)}', 'danger')
+        app.logger.error(f"Alarm deactivation failed: {str(e)}")
+    
+    return redirect(url_for('dashboard'))
