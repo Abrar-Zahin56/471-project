@@ -1,0 +1,29 @@
+///// employee alarm
+{% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show">
+                        {% if category == 'danger' %}
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                        {% endif %}
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Alarm Status Banner -->
+        {% set active_alarm = Alarm.query.filter_by(status='active').order_by(Alarm.timestamp.desc()).first() %}
+        {% if active_alarm %}
+        <div class="alert alert-danger alert-dismissible fade show mb-4">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-bell fa-shake fa-2x me-3"></i>
+                <div>
+                    <h4 class="alert-heading mb-1">🚨 GENERAL ALARM ACTIVATED 🚨</h4>
+                    <p class="mb-0">Return to your station immediately!</p>
+                    <small class="text-muted">Activated at {{ active_alarm.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</small>
+                </div>
+            </div>
+        </div>
+        {% endif %}
