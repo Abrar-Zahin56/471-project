@@ -1,0 +1,28 @@
+body {
+    background-color: #f4f4f4;
+    background-image: url("{{ url_for('static', filename='images/login_bg.png') }}");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 800px;
+    background: rgba(248, 248, 248, 0.95); /* Slightly more opaque */
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    margin-top: 5vh; /* Centers vertically */
+    margin-bottom: 5vh;
+}
+
+/* For better form visibility */
+.card {
+    background-color: transparent;
+    border: none;
+}
+.card-body {
+    padding: 0;
+}

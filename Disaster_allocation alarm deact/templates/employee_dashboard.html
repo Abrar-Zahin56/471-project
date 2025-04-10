@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">Fire Department</a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text me-3">
+                    Logged in as: {{ user.username }} ({{ user.role }})
+                </span>
+                <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show">
+                        {% if category == 'danger' %}
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                        {% endif %}
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Alarm Status Banner -->
+        {% set active_alarm = Alarm.query.filter_by(status='active').order_by(Alarm.timestamp.desc()).first() %}
+        {% if active_alarm %}
+        <div class="alert alert-danger alert-dismissible fade show mb-4">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-bell fa-shake fa-2x me-3"></i>
+                <div>
+                    <h4 class="alert-heading mb-1">🚨 GENERAL ALARM ACTIVATED 🚨</h4>
+                    <p class="mb-0">Return to your station immediately!</p>
+                    <small class="text-muted">Activated at {{ active_alarm.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</small>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <h2>Your Assigned Emergencies</h2>
+        
+        {% if emergencies %}
+            <div class="row">
+                {% for emergency in emergencies %}
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-header bg-warning">
+                            <h5 class="card-title mb-0">
+                                {{ emergency.emergency_type|upper }} EMERGENCY
+                                <span class="badge bg-secondary float-end">
+                                    #{{ emergency.id }}
+                                </span>
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">
+                                <strong>Location:</strong> {{ emergency.location }}<br>
+                                <strong>Reported:</strong> {{ emergency.timestamp.strftime('%Y-%m-%d %H:%M') }}<br>
+                                <strong>Status:</strong> 
+                                <span class="badge bg-{{ 'primary' if emergency.status == 'pending' else 'warning' if emergency.status == 'dispatched' else 'success' }}">
+                                    {{ emergency.status|upper }}
+                                </span>
+                            </p>
+                            
+                            {% if emergency.status == 'dispatched' %}
+                            <form action="{{ url_for('update_status', emergency_id=emergency.id) }}" method="POST">
+                                <input type="hidden" name="status" value="resolved">
+                                <button type="submit" class="btn btn-success w-100">
+                                    <i class="fas fa-check-circle"></i> Mark Resolved
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                You currently have no assigned emergencies.
+            </div>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto-refresh every 30 seconds
+        setTimeout(function(){
+            window.location.reload();
+        }, 30000);
+
+        // Make bell shake for attention
+        document.addEventListener('DOMContentLoaded', function() {
+            const alarmBell = document.querySelector('.fa-shake');
+            if (alarmBell) {
+                setTimeout(() => {
+                    alarmBell.classList.remove('fa-shake');
+                }, 5000);
+            }
+        });
+    </script>
+    <!-- Add this JavaScript right before </body> -->
+    <script>
+        // Real-time alarm monitoring
+        function checkAlarmStatus() {
+            fetch('/check_alarm')
+                .then(response => response.json())
+                .then(data => {
+                    const alarmBanner = document.getElementById('alarm-banner');
+                    const alarmFlash = document.getElementById('alarm-flash');
+                    
+                    if (data.active) {
+                        // Show banner if not already visible
+                        if (alarmBanner.classList.contains('d-none')) {
+                            alarmBanner.classList.remove('d-none');
+                            
+                            // Create flash message
+                            const flashHTML = 
+                                <div class="alert alert-danger alert-dismissible fade show">
+                                    <i class="fas fa-bell me-2"></i>
+                                    GENERAL ALARM ACTIVATED - Return to station immediately!
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            ;
+                            alarmFlash.innerHTML = flashHTML;
+                            
+                            // Make browser tab blink
+                            document.title = "🚨 ALARM ACTIVATED 🚨";
+                            setTimeout(() => {
+                                document.title = "Fire Department - ALARM";
+                            }, 1000);
+                        }
+                    } else {
+                        // Hide banner if visible
+                        if (!alarmBanner.classList.contains('d-none')) {
+                            alarmBanner.classList.add('d-none');
+                            document.title = "Fire Department";
+                        }
+                    }
+                });
+        }
+        
+        // Check every 2 seconds
+        setInterval(checkAlarmStatus, 2000);
+        checkAlarmStatus(); // Initial check
+        
+        // Sound effect (optional)
+        function playAlarmSound() {
+            const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3');
+            audio.loop = true;
+            audio.play().catch(e => console.log("Audio play failed:", e));
+            return audio;
+        }
+        
+        let alarmAudio;
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if alarm is active on page load
+            fetch('/check_alarm')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.active) {
+                        alarmAudio = playAlarmSound();
+                    }
+                });
+            
+            // Stop alarm when deactivated from another tab
+            window.addEventListener('storage', function(event) {
+                if (event.key === 'alarm_status' && event.newValue === 'inactive') {
+                    if (alarmAudio) {
+                        alarmAudio.pause();
+                        alarmAudio.currentTime = 0;
+                    }
+                }
+            });
+        });
+        </script>
+</body>
+</html>
