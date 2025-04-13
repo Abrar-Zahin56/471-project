@@ -1,0 +1,16 @@
+
+{% extends "base.html" %}
+{% block content %}
+<h2>Create Employee Profile</h2>
+<form method="post" class="card p-4">
+    {% for label, name in [('Username', 'username'), ('Password', 'password'), ('Employee ID', 'employee_id'),
+                           ('Name', 'name'), ('Phone', 'phone'), ('Address', 'address'), ('Role', 'emp_role'),
+                           ('Salary', 'salary')] %}
+    <div class="mb-3">
+        <label class="form-label">{{ label }}</label>
+        <input type="text" name="{{ name }}" class="form-control">
+    </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-primary">Create</button>
+</form>
+{% endblock %}
