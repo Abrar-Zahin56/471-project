@@ -1,0 +1,15 @@
+
+{% extends "base.html" %}
+{% block content %}
+<h2>Update Profile</h2>
+<form method="post" class="card p-4">
+    {% for label, name, value in [('Name', 'name', profile.name), ('Phone', 'phone', profile.phone),
+                                  ('Address', 'address', profile.address), ('Role', 'role', profile.role)] %}
+    <div class="mb-3">
+        <label class="form-label">{{ label }}</label>
+        <input type="text" name="{{ name }}" class="form-control" value="{{ value }}">
+    </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-primary">Update</button>
+</form>
+{% endblock %}

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Confirm Salary Payment</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        #card-element {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Enter Card Details to Pay Salary</h2>
+    <form id="payment-form">
+        <div id="card-element"><!-- Stripe injects the card input here --></div>
+        <button type="submit" id="submit">Pay</button>
+        <div id="error-message" style="color:red;"></div>
+    </form>
+
+    <script>
+        const stripe = Stripe("pk_test_51RLkiOHGFG6UeFUeGrkN2e7qpzI4wHouKVnEL1wL7iq2OBV4DSGyVSsnFLA0puJ9ZWh98BMaWMVtEKYTyb8JOncE00kw1N99HQ"); // Replace with your real publishable key
+        const elements = stripe.elements();
+        const card = elements.create("card");
+        card.mount("#card-element");
+
+        const clientSecret = "{{ client_secret }}";  // Provided by Flask backend
+
+        document.getElementById("payment-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+                payment_method: {
+                    card: card
+                }
+            });
+
+            if (error) {
+                document.getElementById("error-message").textContent = error.message;
+            } else {
+                alert("Salary paid successfully!");
+                // Optionally redirect or reload here
+            }
+        });
+    </script>
+</body>
+</html>
