@@ -9,3 +9,4 @@ Flask-Migrate
 twilio
 stripe
 reportlab
+requests
