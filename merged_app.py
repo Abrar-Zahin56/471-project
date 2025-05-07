@@ -26,11 +26,13 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
+with app.app_context():
+    if not os.path.exists('firefighter.db'):
+        db.create_all()
+
 migrate = Migrate(app, db)
 
-@app.before_first_request
-def create_tables():
-    db.create_all()
+
 
 
 
@@ -733,5 +735,4 @@ if __name__ == '__main__':
             db.create_all()
     app.run(debug=True)
 
-from flask_migrate import Migrate, upgrade
-migrate = Migrate(app, db)
+
