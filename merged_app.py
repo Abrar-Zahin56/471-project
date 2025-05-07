@@ -25,12 +25,10 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///firefighter.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
-
+migrate = Migrate(app, db)
 with app.app_context():
     if not os.path.exists('firefighter.db'):
         db.create_all()
-
-migrate = Migrate(app, db)
 
 
 
