@@ -18,6 +18,10 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_here'
 app.secret_key = 'your_secret_key'
 
+@app.before_first_request
+def create_tables():
+    db.create_all()
+
 # Database configuration
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///firefighter.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
