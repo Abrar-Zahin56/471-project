@@ -15,6 +15,7 @@ stripe.api_key = 'sk_test_51RLkiOHGFG6UeFUe6JqQgtGYoBCFZG0eADguyWIpwKMN7Kxrw9Nnp
 
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'your_secret_here'
 app.secret_key = 'your_secret_key'
 
 # Database configuration
