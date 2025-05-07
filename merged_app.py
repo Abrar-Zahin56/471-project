@@ -197,7 +197,7 @@ def employee_dashboard():
 
 from flask import flash, redirect
 
-@app.route('/create-profile', methods=['GET', 'POST'])
+@app.route('/create-profile', methods=['GET', 'POST'], endpoint='create_profile')
 def create_profile():
     if session.get('role') != 'admin':
         return redirect(url_for('login'))
