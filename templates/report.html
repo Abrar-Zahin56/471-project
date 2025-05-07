@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .title { text-align: center; font-size: 24px; color: #2c3e50; margin-bottom: 30px; }
+        .report-section { margin-bottom: 10px; }
+        .label { font-weight: bold; color: #333; }
+    </style>
+</head>
+<body>
+    <div class="title">Disaster Report Summary</div>
+    <div class="report-section">
+        <span class="label">Disaster Type:</span> {{ disaster_type }}
+    </div>
+    <div class="report-section">
+        <span class="label">Disaster Location:</span> {{ disaster_location }}
+    </div>
+    <div class="report-section">
+        <span class="label">Number of Employees Present:</span> {{ employees_present }}
+    </div>
+    <div class="report-section">
+        <span class="label">Estimated Number of People Affected:</span> {{ people_affected }}
+    </div>
+    <div class="report-section">
+        <span class="label">Report Generated At:</span> {{ timestamp }}
+    </div>
+</body>
+</html>

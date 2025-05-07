@@ -1,0 +1,48 @@
+<div class="card shadow mt-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Live Chat (Admin & Employee)</h5>
+    </div>
+    <div class="card-body">
+        <div id="chat-box" style="height: 250px; overflow-y: scroll; background: #f1f1f1; padding: 10px; border: 1px solid #ccc;"></div>
+        <input type="text" id="sender" class="form-control my-2" placeholder="Your name">
+        <div class="input-group">
+            <input type="text" id="message" class="form-control" placeholder="Type your message">
+            <button class="btn btn-primary" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function sendMessage() {
+        const sender = document.getElementById('sender').value;
+        const message = document.getElementById('message').value;
+        if (message.trim() === '') return;
+
+        fetch('/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `sender=${encodeURIComponent(sender)}&message=${encodeURIComponent(message)}`
+        }).then(() => {
+            document.getElementById('message').value = '';
+            loadMessages();
+        });
+    }
+
+    function loadMessages() {
+        fetch('/get_messages')
+            .then(res => res.json())
+            .then(data => {
+                const chatBox = document.getElementById('chat-box');
+                chatBox.innerHTML = '';
+                data.forEach(msg => {
+                    const row = document.createElement('div');
+                    row.innerHTML = `<strong>${msg.sender}:</strong> ${msg.message}`;
+                    chatBox.appendChild(row);
+                });
+                chatBox.scrollTop = chatBox.scrollHeight;
+            });
+    }
+
+    setInterval(loadMessages, 1000);
+    window.onload = loadMessages;
+</script>

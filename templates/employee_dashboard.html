@@ -1,0 +1,48 @@
+
+{% extends "base.html" %}
+{% block content %}
+<h2>Employee Dashboard</h2>
+<div class="card p-3">
+    <p><strong>Name:</strong> {{ profile.name }}</p>
+    <p><strong>Phone:</strong> {{ profile.phone }}</p>
+    <p><strong>Role:</strong> {{ profile.role }}</p>
+    <p><strong>Address:</strong> {{ profile.address }}</p>
+    <a href="/update-profile" class="btn btn-primary">Update Info</a>
+    <a href="/submit-report" class="btn btn-success mt-2">Submit Report</a>
+</div>
+{% if active_alarm %}
+  <div id="alarm-alert" class="alert alert-danger">
+    🚨 An alarm is currently active! Please respond immediately. 🚨
+  </div>
+{% endif %}
+{% if assigned_emergency %}
+  <div id="emergency-alert" class="alert alert-danger">
+      <strong>Emergency Alert!</strong><br>
+      <strong>Type:</strong> {{ assigned_emergency.emergency_type }}<br>
+      <strong>Location:</strong> {{ assigned_emergency.location }}<br>
+
+      {% if assigned_emergency.acknowledged %}
+          <form action="{{ url_for('resolve_emergency', emergency_id=assigned_emergency.id) }}" method="POST">
+              <button type="submit" class="btn btn-success mt-2">Resolve</button>
+          </form>
+      {% else %}
+          <form action="{{ url_for('respond_emergency', emergency_id=assigned_emergency.id) }}" method="POST">
+              <button type="submit" class="btn btn-warning mt-2">Respond</button>
+          </form>
+      {% endif %}
+  </div>
+{% else %}
+  <div class="alert alert-info">
+      No current emergency assigned to you.
+  </div>
+{% endif %}
+
+{% if profile.salary_paid %}
+<div class="alert alert-success mt-3">
+    💰 Your salary has been paid for this month.
+</div>
+{% endif %}
+
+{% include 'chatbox.html' %}
+
+{% endblock %}

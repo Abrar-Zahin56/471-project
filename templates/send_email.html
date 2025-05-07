@@ -1,0 +1,33 @@
+<!-- templates/send_email.html -->
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow p-4">
+        <h2 class="text-center text-primary mb-4">Send Emergency Email</h2>
+        <form method="POST">
+            <div class="mb-3">
+                <label class="form-label">Select Area</label>
+                <select class="form-select" name="location" required>
+                    <option value="">-- Choose Area --</option>
+                    <option value="Mirpur">Mirpur</option>
+                    <option value="Badda">Badda</option>
+                    <option value="Uttara">Uttara</option>
+                    <option value="Kalabagan">Kalabagan</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Subject</label>
+                <input type="text" class="form-control" name="subject" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Message</label>
+                <textarea class="form-control" name="body" rows="5" required></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-danger w-100">Send Emergency Alert</button>
+        </form>
+    </div>
+</div>
+{% endblock %} 

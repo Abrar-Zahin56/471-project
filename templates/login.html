@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="login-page">
+    <div class="login-container">
+        <h2 class="mb-4">Login</h2>
+
+        <!-- Login Form -->
+        <form method="POST" class="card p-4">
+            <div class="mb-3">
+                <label class="form-label">Username</label>
+                <input type="text" name="username" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <input type="password" name="password" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Login</button>
+        </form>
+    </div>
+</div>
+
+<!-- Active Fire Outbreaks Section -->
+{% if active_fire_emergencies %}
+<div class="fire-alert-container mt-5">
+    <h4 class="text-warning mb-2">🔥 Active Fire Outbreaks</h4>
+    <ul class="list-unstyled">
+        {% for fire in active_fire_emergencies %}
+        <li class="fire-alert-box">
+            <strong>{{ fire.location }}</strong> reported at {{ fire.timestamp.strftime('%Y-%m-%d %H:%M') }} 
+            <span>(Status: {{ fire.status|capitalize }})</span>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<style>
+    /* Full-page background image */
+    .login-page {
+        background-image: url('{{ url_for('static', filename='images/login.jpg') }}');
+        background-size: cover;
+        background-position: center;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+    }
+
+    /* Center the login form */
+    .login-container {
+        background-color: rgba(255, 255, 255, 0.8); /* Light opacity for better readability */
+        padding: 30px;
+        border-radius: 10px;
+        width: 100%;
+        max-width: 400px;
+        z-index: 2;
+    }
+
+    h2 {
+        text-align: center;
+    }
+
+    /* Optional: Make the form container look nice with rounded corners and shadow */
+    .card {
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Style for active fire outbreaks */
+    .fire-alert-container {
+        background-color: #111;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: inset 0 0 10px #440000;
+        margin-top: 40px;
+        text-align: left;
+        animation: fadein 1s ease-in-out;
+    }
+
+    .fire-alert-box {
+        background-color: #300;
+        color: #fff;
+        padding: 12px;
+        margin-bottom: 10px;
+        border-radius: 6px;
+        animation: glowAlert 2s infinite alternate;
+        box-shadow: 0 0 10px #ff0000;
+        transition: transform 0.3s ease;
+    }
+
+    .fire-alert-box:hover {
+        transform: scale(1.02);
+    }
+
+    @keyframes glowAlert {
+        0% {
+            background-color: #300;
+            box-shadow: 0 0 10px #ff0000;
+        }
+        100% {
+            background-color: #000;
+            box-shadow: 0 0 20px #ff3333, 0 0 30px #ff0000;
+        }
+    }
+</style>
+
+{% endblock %}

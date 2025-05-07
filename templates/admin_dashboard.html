@@ -1,0 +1,386 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Admin Dashboard</h2>
+
+<a href="{{ url_for('create_profile') }}" class="btn btn-primary">Create Profile</a>
+
+
+<!-- REPORT -->
+<a href="{{ url_for('report_archive') }}" class="btn btn-outline-dark mt-3">📁 View All Reports</a>
+
+
+<div class="list-group mb-4">
+  {% for emp in personnel %}
+    <div class="list-group-item d-flex justify-content-between align-items-center">
+      <div>{{ emp.name }} ({{ emp.role }})</div>
+      <div class="btn-group">
+        <a href="{{ url_for('edit_role', user_id=emp.user_id) }}"
+           class="btn btn-sm btn-outline-primary">Edit Role</a>
+        <form action="{{ url_for('delete_profile', employee_id=emp.id) }}"
+              method="POST"
+              onsubmit="return confirm('Are you sure you want to delete this employee?');">
+          <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+        </form>
+        <form method="POST" action="{{ url_for('pay_salary', employee_id=emp.user_id) }}">
+          <input type="hidden" name="payment_method_id" value="pm_card_visa">  <!-- Stripe test payment method -->
+          <input type="number" name="amount" placeholder="Amount (USD)" required>
+          <button type="submit" class="btn btn-success btn-sm">Pay Salary</button>
+        </form>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+<div class="container py-4">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} mb-3">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Emergency Management System</h2>
+    <span class="badge bg-dark">Admin Dashboard</span>
+  </div>
+
+  <!-- Declare New Emergency -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-danger text-white">
+      <div class="d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">Declare New Emergency</h4>
+        <i class="fas fa-exclamation-triangle fa-lg"></i>
+      </div>
+    </div>
+    <div class="card-body">
+      <form method="POST"
+            action="{{ url_for('declare_emergency') }}"
+            class="needs-validation"
+            novalidate>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="location" class="form-label">Emergency Location</label>
+            <input type="text"
+                   class="form-control"
+                   id="location"
+                   name="location"
+                   placeholder="123 Main St"
+                   required>
+            <div class="invalid-feedback">Please provide a location.</div>
+          </div>
+          <div class="col-md-6">
+            <label for="emergency_type" class="form-label">Emergency Type</label>
+            <select class="form-select"
+                    id="emergency_type"
+                    name="emergency_type"
+                    required>
+              <option value="" selected disabled>Select type…</option>
+              <option value="fire">🔥 Fire Outbreak</option>
+              <option value="medical">🚑 Medical Emergency</option>
+              <option value="rescue">🚨 Rescue Operation</option>
+              <option value="hazardous">☢️ Hazardous Material</option>
+            </select>
+            <div class="invalid-feedback">Please select an emergency type.</div>
+          </div>
+        </div>
+        <button type="submit"
+                class="btn btn-danger mt-3 w-100 py-2 fw-bold">
+          <i class="fas fa-bell me-2"></i>DECLARE EMERGENCY
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- General Alarm -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-dark text-white">
+      <div class="d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">General Alarm</h4>
+        <i class="fas fa-bell fa-lg"></i>
+      </div>
+    </div>
+    <div class="card-body">
+      <!-- Activate Alarm -->
+      <form method="POST"
+            action="{{ url_for('activate_alarm') }}"
+            onsubmit="return confirm('Are you sure you want to ACTIVATE the general alarm?');">
+        <button type="submit"
+                class="btn btn-dark w-100 py-3 fw-bold">
+          <i class="fas fa-bell me-2"></i>ACTIVATE ALARM
+        </button>
+      </form>
+
+      <!-- Deactivate Alarm -->
+      <form method="POST"
+            action="{{ url_for('deactivate_alarm') }}"
+            class="mt-3"
+            onsubmit="return confirm('Are you sure you want to DEACTIVATE the alarm?');">
+        <button type="submit"
+                class="btn btn-danger w-100 py-3 fw-bold">
+          <i class="fas fa-bell-slash me-2"></i>DEACTIVATE ALARM
+        </button>
+      </form>
+
+      <p class="text-muted mt-2 mb-0">
+        This will notify all personnel to return to their stations immediately.
+      </p>
+    </div>
+  </div>
+
+  <!-- Active Emergencies -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-warning text-dark">
+      <h4 class="mb-0">Active Emergencies</h4>
+    </div>
+    <div class="card-body">
+      {% if emergencies %}
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>ID</th><th>Type</th><th>Location</th>
+                <th>Status</th><th>Time</th><th>Assigned To</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for e in emergencies %}
+                <tr class="align-middle">
+                  <td class="fw-bold">#{{ e.id }}</td>
+                  <td>
+                    <span class="badge bg-{{ 'danger' if e.emergency_type=='fire' else 'warning text-dark' if e.emergency_type=='hazardous' else 'info' }}">
+                      {{ e.emergency_type|title }}
+                    </span>
+                  </td>
+                  <td>{{ e.location }}</td>
+                  <td>
+                    <span class="badge bg-{{ 'primary' if e.status=='pending' else 'success' if e.status=='resolved' else 'warning text-dark' }}">
+                      {{ e.status|title }}
+                    </span>
+                  </td>
+                  <td>{{ e.timestamp.strftime('%H:%M') }}</td>
+                  <td>{{ e.assigned_employee.name if e.assigned_employee else 'Unassigned' }}</td>
+                  <td>
+                    {% if e.status=='pending' %}
+                      <form method="POST"
+                            action="{{ url_for('assign_emergency', emergency_id=e.id) }}">
+                        <div class="d-flex">
+                          <select name="employee_id"
+                                  class="form-select form-select-sm me-2"
+                                  required>
+                            <option value="" selected disabled>Choose…</option>
+                            {% for emp in employees %}
+                              <option value="{{ emp.id }}">{{ emp.name }}</option>
+                            {% endfor %}
+                          </select>
+                          <button type="submit"
+                                  class="btn btn-danger btn-sm">Assign</button>
+                        </div>
+                      </form>
+                    {% elif e.status=='dispatched' %}
+                      <form method="POST"
+                            action="{{ url_for('unassign_emergency', emergency_id=e.id) }}">
+                        <button class="btn btn-warning btn-sm">Unassign</button>
+                      </form>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="text-center py-4">
+          <div class="alert alert-success d-inline-flex align-items-center">
+            <i class="fas fa-check-circle me-2 fa-lg"></i>
+            <span class="h5 mb-0">No active emergencies – all clear!</span>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Personnel Status -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+      <h4 class="mb-0">Personnel Status</h4>
+    </div>
+    <div class="card-body p-0">
+      <ul class="list-group list-group-flush">
+        {% for emp in personnel %}
+          <li class="list-group-item">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="mb-0">{{ emp.name }}</h6>
+                <small class="text-muted">
+                  {% if emp.on_call %}
+                    {% for c in emp.on_calls %}
+                      On call: {{ c.emergency_type|title }} at {{ c.location }}<br>
+                    {% endfor %}
+                  {% else %}
+                    Available for assignment
+                  {% endif %}
+                </small>
+              </div>
+              <span class="badge 
+                {% if emp.on_call %}bg-info
+                {% elif emp.status=='available' %}bg-success
+                {% else %}bg-secondary{% endif %}
+                rounded-pill">
+                {% if emp.on_call %}Active{% else %}{{ emp.status|capitalize }}{% endif %}
+              </span>
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <!-- Resolved Emergencies -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-success text-white">
+      <h4 class="mb-0">Resolved Emergencies</h4>
+    </div>
+    <div class="card-body">
+      {% if resolved_emergencies %}
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>ID</th><th>Type</th><th>Location</th><th>Assigned To</th><th>Time Declared</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for e in resolved_emergencies %}
+                <tr class="align-middle">
+                  <td class="fw-bold">#{{ e.id }}</td>
+                  <td>
+                    <span class="badge bg-{{ 'danger' if e.emergency_type=='fire' else 'warning text-dark' if e.emergency_type=='hazardous' else 'info' }}">
+                      {{ e.emergency_type|title }}
+                    </span>
+                  </td>
+                  <td>{{ e.location }}</td>
+                  <td>{{ e.assigned_employee.name if e.assigned_employee else 'Unassigned' }}</td>
+                  <td>{{ e.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="text-center py-4">
+          <div class="alert alert-info d-inline-flex align-items-center">
+            <i class="fas fa-info-circle me-2 fa-lg"></i>
+            <span class="h5 mb-0">No resolved emergencies yet</span>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  
+
+  <!-- Live Weather -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0">🌦️ Live Weather Updates</h5>
+    </div>
+    <div class="card-body">
+      <ul class="list-group">
+        {% for loc, w in weather_info.items() %}
+          <li class="list-group-item d-flex justify-content-between">
+            <strong>{{ loc }}</strong>
+            <span>{{ w }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+
+<!-- Alert Residents Section -->
+<div class="card shadow-sm mb-4">
+  <div class="card-header bg-info text-white">
+      <h4 class="mb-0">Alert Residents</h4>
+  </div>
+  <div class="card-body">
+      <p>You can notify residents of a selected area about any urgent disaster situation.</p>
+      <a href="{{ url_for('send_email') }}" class="btn btn-danger">Send Emergency Email</a>
+  </div>
+</div>
+
+
+<!-- Chatbox -->
+  {% include 'chatbox.html' %}
+</div>
+
+
+<!-- Inventory Management -->
+<div class="card shadow-sm mb-4">
+  <div class="card-header bg-info text-white">
+    <h5 class="mb-0">🧯 Inventory Management</h5>
+  </div>
+  <div class="card-body">
+    <!-- Add Item Form -->
+    <form method="POST" action="{{ url_for('add_inventory_item') }}" class="row g-3 mb-4">
+      <div class="col-md-4">
+        <input type="text" name="name" class="form-control" placeholder="Item Name" required>
+      </div>
+      <div class="col-md-2">
+        <input type="number" name="quantity" class="form-control" placeholder="Quantity" required>
+      </div>
+      <div class="col-md-4">
+        <input type="text" name="description" class="form-control" placeholder="Description (optional)">
+      </div>
+      <div class="col-md-2">
+        <button class="btn btn-success w-100">Add Item</button>
+      </div>
+    </form>
+
+    <!-- Inventory Table -->
+    {% if inventory %}
+    <div class="table-responsive">
+      <table class="table table-bordered">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th><th>Name</th><th>Quantity</th><th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in inventory %}
+            <tr>
+              <td>{{ item.id }}</td>
+              <td>{{ item.name }}</td>
+              <td>{{ item.quantity }}</td>
+              <td>{{ item.description or 'N/A' }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      <p>No inventory items yet.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+
+{% block scripts %}
+  {{ super() }}
+  <script>
+    // Bootstrap form‐validation
+    ;(function(){
+      'use strict'
+      Array.from(document.querySelectorAll('.needs-validation'))
+           .forEach(form => form.addEventListener('submit', ev=>{
+             if (!form.checkValidity()) {
+               ev.preventDefault()
+               ev.stopPropagation()
+             }
+             form.classList.add('was-validated')
+           }, false))
+    })();
+  </script>
+{% endblock %}

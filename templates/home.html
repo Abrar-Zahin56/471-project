@@ -1,0 +1,60 @@
+
+{% extends "base.html" %}
+{% block content %}
+<div class="text-center">
+    <h2 class="mb-4">Welcome to the Firefighter Management System</h2>
+    <a href="/login" class="btn btn-primary">Login</a>
+</div>
+{% if active_fire_emergencies %}
+<div class="fire-alert-container">
+    <h4 class="text-warning mb-2">🔥 Active Fire Outbreaks</h4>
+    <ul class="list-unstyled">
+        {% for fire in active_fire_emergencies %}
+        <li class="fire-alert-box">
+            <strong>{{ fire.location }}</strong> reported at {{ fire.timestamp.strftime('%Y-%m-%d %H:%M') }} 
+            <span>(Status: {{ fire.status|capitalize }})</span>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+{% endblock %}
+
+<style>
+    .fire-alert-container {
+        background-color: #111;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: inset 0 0 10px #440000;
+        margin-top: 40px;
+        text-align: left;
+        animation: fadein 1s ease-in-out;
+    }
+    
+    .fire-alert-box {
+        background-color: #300;
+        color: #fff;
+        padding: 12px;
+        margin-bottom: 10px;
+        border-radius: 6px;
+        animation: glowAlert 2s infinite alternate;
+        box-shadow: 0 0 10px #ff0000;
+        transition: transform 0.3s ease;
+    }
+    
+    .fire-alert-box:hover {
+        transform: scale(1.02);
+    }
+    
+    @keyframes glowAlert {
+        0% {
+            background-color: #300;
+            box-shadow: 0 0 10px #ff0000;
+        }
+        100% {
+            background-color: #000;
+            box-shadow: 0 0 20px #ff3333, 0 0 30px #ff0000;
+        }
+    }
+    </style>
+
